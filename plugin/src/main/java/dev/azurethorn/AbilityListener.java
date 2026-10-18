@@ -398,6 +398,9 @@ final class AbilityListener implements Listener {
         for (double d = 0; d < len; d += 1.0) {
             float segment = (float) Math.min(1.0, len - d);
             Location at = from.clone().add(dir.clone().multiply(d));
+            // Display entities also apply their own yaw/pitch; zero it so only the transformation rotates the chain.
+            at.setYaw(0);
+            at.setPitch(0);
             BlockDisplay link = at.getWorld().spawn(at, BlockDisplay.class, e -> {
                 e.setBlock(CHAIN);
                 e.setPersistent(false);
