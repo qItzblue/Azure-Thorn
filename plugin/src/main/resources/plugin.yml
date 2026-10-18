@@ -1,0 +1,13 @@
+name: AzureThorn
+version: ${project.version}
+main: dev.azurethorn.AzureThornPlugin
+api-version: '1.21'
+description: The Azure Thorn chained scythe-axe.
+commands:
+  azurethorn:
+    description: Give the Azure Thorn.
+    usage: /azurethorn give [player]
+    permission: azurethorn.give
+permissions:
+  azurethorn.give:
+    default: op
