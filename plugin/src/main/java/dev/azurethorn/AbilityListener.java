@@ -14,6 +14,8 @@ import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
+import org.bukkit.entity.BlockDisplay;
+import org.bukkit.entity.Display;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -31,7 +33,10 @@ import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -188,6 +193,7 @@ final class AbilityListener implements Listener {
                     // Rise until the launch tops out, then fire the chain at the floor.
                     if (ticks > 3 && p.getVelocity().getY() <= 0.1) {
                         pulling = true;
+                        spawnChain(loc.clone().add(0, 0.8, 0), groundBelow(loc), 12);
                         p.getWorld().playSound(loc, Sound.BLOCK_CHAIN_PLACE, 1.5f, 0.6f);
                     }
                     return;
@@ -287,7 +293,10 @@ final class AbilityListener implements Listener {
 
     private void thornChain(Player p, LivingEntity target) {
         if (!p.isOnline() || target.isDead()) return;
-        drawChain(p.getEyeLocation().subtract(0, 0.3, 0), target.getLocation().add(0, target.getHeight() / 2, 0));
+        Location from = p.getEyeLocation().subtract(0, 0.3, 0);
+        Location to = target.getLocation().add(0, target.getHeight() / 2, 0);
+        spawnChain(from, to, 15);
+        drawChain(from, to);
         p.getWorld().playSound(target.getLocation(), Sound.BLOCK_CHAIN_BREAK, 1.5f, 0.7f);
 
         target.setNoDamageTicks(0);
@@ -372,6 +381,30 @@ final class AbilityListener implements Listener {
             w.spawnParticle(Particle.BLOCK, at, 1, 0, 0, 0, 0, CHAIN);
             if (((int) (d / 0.4)) % 3 == 0) w.spawnParticle(Particle.SOUL_FIRE_FLAME, at, 1, 0, 0, 0, 0);
             at.add(step);
+        }
+    }
+
+    /** Real chain blocks (block displays) laid along the line, removed after lifeTicks. */
+    private void spawnChain(Location from, Location to, int lifeTicks) {
+        Vector dir = to.toVector().subtract(from.toVector());
+        double len = dir.length();
+        if (len < 0.1) return;
+        dir.normalize();
+        Quaternionf rot = new Quaternionf().rotationTo(new Vector3f(0, 1, 0),
+                new Vector3f((float) dir.getX(), (float) dir.getY(), (float) dir.getZ()));
+        // The chain model sits in the middle of the block; shift it so it runs along the line.
+        Vector3f offset = rot.transform(new Vector3f(-0.5f, 0, -0.5f));
+
+        for (double d = 0; d < len; d += 1.0) {
+            float segment = (float) Math.min(1.0, len - d);
+            Location at = from.clone().add(dir.clone().multiply(d));
+            BlockDisplay link = at.getWorld().spawn(at, BlockDisplay.class, e -> {
+                e.setBlock(CHAIN);
+                e.setPersistent(false);
+                e.setBrightness(new Display.Brightness(15, 15));
+                e.setTransformation(new Transformation(offset, rot, new Vector3f(1, segment, 1), new Quaternionf()));
+            });
+            plugin.getServer().getScheduler().runTaskLater(plugin, link::remove, lifeTicks);
         }
     }
 }

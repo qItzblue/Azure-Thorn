@@ -19,6 +19,8 @@ import java.util.List;
 /** Builds and recognises the Azure Thorn item (a netherite axe retextured by the resource pack). */
 public final class AzureThornItem {
 
+    public static final int CUSTOM_MODEL_DATA = 7001;
+
     private final NamespacedKey key;
     private final NamespacedKey damageKey;
     private final NamespacedKey speedKey;
@@ -54,6 +56,8 @@ public final class AzureThornItem {
         meta.addAttributeModifier(Attribute.GENERIC_ATTACK_SPEED, new AttributeModifier(
                 speedKey, -2.0, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND));
 
+        // Resource pack swaps in the Azure Thorn model only for this value.
+        meta.setCustomModelData(CUSTOM_MODEL_DATA);
         meta.getPersistentDataContainer().set(key, PersistentDataType.BYTE, (byte) 1);
         stack.setItemMeta(meta);
         return stack;

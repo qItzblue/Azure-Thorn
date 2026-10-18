@@ -3,7 +3,7 @@
 A Paper plugin and resource pack for **Minecraft 1.21.1**.
 
 - `plugin/` – the Paper plugin. Build it with `mvn package` and copy `target/AzureThorn-1.0.0.jar` into the server's `plugins/` folder.
-- `resourcepack/` – the model and texture (a retexture of Linaryx's Blood Scythe, applied to the netherite axe). Zip the folder's contents and use the zip as the server resource pack.
+- `resourcepack/` – the model and texture (a retexture of Linaryx's Blood Scythe). It only changes netherite axes with custom model data 7001, which the plugin gives Azure Thorn, so normal axes look vanilla. Zip the folder's contents and use the zip as the server resource pack.
 
 `/azurethorn give [player]` (op only) gives the weapon.
 
